@@ -8,6 +8,7 @@
 ## Usage
 ### Import this as submodule in your project:
 ```
+git submodule add https://github.com/nobnak/Gist.git Assets/Packages/Gist
 git submodule add https://github.com/nobnak/KlakSpout.git Assets/Packages/KlakSpout
 ```
 
