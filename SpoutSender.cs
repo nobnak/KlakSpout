@@ -63,7 +63,7 @@ namespace Klak.Spout
         void Update()
         {
             senderTexture.Prepare(data);
-			temporaryTexture.Size = data.Size;
+			temporaryTexture.Size = senderTexture.Size;
             SetTargetTexture(temporaryTexture.Texture);
             PluginEntry.Poll();
         }
