@@ -60,19 +60,22 @@ namespace Klak.Spout
             EnabledOnDisable.Invoke(!enabled);
         }
 
-        void Update()
-        {
-            senderTexture.Prepare(data);
+        void Update() {
+			PluginEntry.Poll();
+
+			senderTexture.Prepare(data);
 			temporaryTexture.Size = data.Size;
             SetTargetTexture(temporaryTexture.Texture);
-            PluginEntry.Poll();
         }
         
         void OnRenderImage(RenderTexture source, RenderTexture destination)
         {
-            var sharedTexture = senderTexture.SharedTexture();
-            if (sharedTexture != null)
-            {
+			Texture2D sharedTexture;
+            if (senderTexture != null
+				&& (sharedTexture = senderTexture.SharedTexture()) != null 
+				&& sharedTexture.width > 0 
+				&& sharedTexture.height > 0) {
+
                 // Lazy initialization for the fix-up shader.
                 if (_fixupMaterial == null)
                     _fixupMaterial = new Material(Shader.Find("Hidden/Spout/Fixup"));
@@ -81,7 +84,8 @@ namespace Klak.Spout
                 _fixupMaterial.SetFloat("_ClearAlpha", _clearAlpha ? 1 : 0);
 
                 // Apply the fix-up shader.
-                var tempRT = RenderTexture.GetTemporary(sharedTexture.width, sharedTexture.height);
+                var tempRT = RenderTexture.GetTemporary(sharedTexture.width, sharedTexture.height,
+					0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.sRGB, 1);
                 Graphics.Blit(source, tempRT, _fixupMaterial, 0);
 
                 // Copy the result to the shared texture.

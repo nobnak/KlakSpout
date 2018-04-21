@@ -47,6 +47,15 @@ namespace Klak.Spout {
                 TryBuildTexture(_sender, out _sharedTexture);
             return _sharedTexture;
         }
+		public virtual Vector2Int Size {
+			get {
+				return (_sender == System.IntPtr.Zero) ?
+					default(Vector2Int) :
+					new Vector2Int(
+						PluginEntry.GetTextureWidth(_sender),
+						PluginEntry.GetTextureHeight(_sender));
+			}
+		}
 
         public static bool TryBuildSender(Data next, out System.IntPtr sender) {
             sender = PluginEntry.CreateSender(next.name, next.width, next.height);
