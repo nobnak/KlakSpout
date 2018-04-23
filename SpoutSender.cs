@@ -34,7 +34,7 @@ namespace Klak.Spout
         {
             senderTexture = new SpoutSenderTexture();
 
-			temporaryTexture = new ResizableRenderTexture(new Format() {
+			temporaryTexture = new ResizableRenderTexture(new nobnak.Gist.Resizable.FormatRT() {
 				readWrite = RenderTextureReadWrite.sRGB,
 				antiAliasing = QualitySettings.antiAliasing
 			});
@@ -62,12 +62,12 @@ namespace Klak.Spout
             EnabledOnDisable.Invoke(!enabled);
         }
         void Update() {
-			PluginEntry.Poll();
-
 			senderTexture.Prepare(data);
 			temporaryTexture.Size = data.Size;
             SetTargetTexture(temporaryTexture.Texture);
-        }
+
+			PluginEntry.Poll();
+		}
 		#endregion
 
 		protected virtual void SetTargetTexture(RenderTexture tex) {
@@ -79,24 +79,20 @@ namespace Klak.Spout
 				&& (sharedTexture = senderTexture.SharedTexture()) != null
 				&& sharedTexture.width > 0
 				&& sharedTexture.height > 0) {
-
-				// Lazy initialization for the fix-up shader.
+				
 				if (_fixupMaterial == null)
 					_fixupMaterial = new Material(Shader.Find("Hidden/Spout/Fixup"));
-
-				// Parameters for the fix-up shader.
 				_fixupMaterial.SetFloat("_ClearAlpha", _clearAlpha ? 1 : 0);
-
-				// Apply the fix-up shader.
+				
 				var tempRT = RenderTexture.GetTemporary(sharedTexture.width, sharedTexture.height,
-					0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.sRGB, 1);
-				Graphics.Blit(temporaryTexture.Texture, tempRT, _fixupMaterial, 0);
+					0, UnityEngine.RenderTextureFormat.ARGB32, RenderTextureReadWrite.sRGB);
+				try {
+					Graphics.Blit(temporaryTexture.Texture, tempRT, _fixupMaterial, 0);
+					Graphics.CopyTexture(tempRT, sharedTexture);
 
-				// Copy the result to the shared texture.
-				Graphics.CopyTexture(tempRT, sharedTexture);
-
-				// Release temporaries.
-				RenderTexture.ReleaseTemporary(tempRT);
+				} finally {
+					RenderTexture.ReleaseTemporary(tempRT);
+				}
 			}
 		}
 		protected IEnumerator ProcessUpdateSharedTexture() {
