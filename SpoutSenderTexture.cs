@@ -1,3 +1,4 @@
+using nobnak.Gist.Extensions.Texture2DExt;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -72,12 +73,12 @@ namespace Klak.Spout {
             var height = PluginEntry.GetTextureHeight(sender);
             sharedTexture = Texture2D.CreateExternalTexture(width, height, 
                 TextureFormat.ARGB32, false, false, ptr);
-            Debug.LogFormat("Build Shared Texture ({0}x{1})", width, height);
+            Debug.LogFormat("Create External Texture2D ({0}x{1})", width, height);
             return true;
         }
         protected virtual void ClearSharedTexture() {
             if (_sharedTexture != null) {
-                DestroyObject(_sharedTexture);
+                _sharedTexture.Destroy();
                 _sharedTexture = null;
             }
         }
@@ -86,13 +87,6 @@ namespace Klak.Spout {
                 PluginEntry.DestroySharedObject(_sender);
                 _sender = System.IntPtr.Zero;
             }
-        }
-
-        public static void DestroyObject(Object obj) {
-            if (Application.isPlaying)
-                Object.Destroy(obj);
-            else
-                Object.DestroyImmediate(obj);
         }
 
         #region Classes
