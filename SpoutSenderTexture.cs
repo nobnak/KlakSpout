@@ -57,26 +57,37 @@ namespace Klak.Spout {
 						PluginEntry.GetTextureHeight(_sender));
 			}
 		}
+		#endregion
 
-        public static bool TryBuildSender(Data next, out System.IntPtr sender) {
-            sender = PluginEntry.CreateSender(next.name, next.width, next.height);
-            return sender != System.IntPtr.Zero;
-        }
-        public static bool TryBuildTexture(System.IntPtr sender, out Texture2D sharedTexture) {
-            sharedTexture = null;
+		#region static
+		public static bool InputValidity(Data data) {
+			return
+				!string.IsNullOrEmpty(data.name)
+				&& data.width >= 4
+				&& data.height >= 4;
+		}
+		public static bool TryBuildSender(Data next, out System.IntPtr sender) {
+			sender = PluginEntry.CreateSender(next.name, next.width, next.height);
+			return sender != System.IntPtr.Zero;
+		}
+		public static bool TryBuildTexture(System.IntPtr sender, out Texture2D sharedTexture) {
+			sharedTexture = null;
 
-            var ptr = PluginEntry.GetTexturePointer(sender);
-            if (ptr == System.IntPtr.Zero)
-                return false;
+			var ptr = PluginEntry.GetTexturePointer(sender);
+			if (ptr == System.IntPtr.Zero)
+				return false;
 
-            var width = PluginEntry.GetTextureWidth(sender);
-            var height = PluginEntry.GetTextureHeight(sender);
-            sharedTexture = Texture2D.CreateExternalTexture(width, height, 
-                TextureFormat.ARGB32, false, false, ptr);
-            Debug.LogFormat("Create External Texture2D ({0}x{1})", width, height);
-            return true;
-        }
-        protected virtual void ClearSharedTexture() {
+			var width = PluginEntry.GetTextureWidth(sender);
+			var height = PluginEntry.GetTextureHeight(sender);
+			sharedTexture = Texture2D.CreateExternalTexture(width, height,
+				TextureFormat.ARGB32, false, false, ptr);
+			Debug.LogFormat("Create External Texture2D ({0}x{1})", width, height);
+			return true;
+		}
+		#endregion
+
+		#region private
+		protected virtual void ClearSharedTexture() {
             if (_sharedTexture != null) {
                 _sharedTexture.Destroy();
                 _sharedTexture = null;
@@ -88,9 +99,10 @@ namespace Klak.Spout {
                 _sender = System.IntPtr.Zero;
             }
         }
+		#endregion
 
-        #region Classes
-        [System.Serializable]
+		#region Classes
+		[System.Serializable]
         public struct Data {
             public string name;
             public int width;
