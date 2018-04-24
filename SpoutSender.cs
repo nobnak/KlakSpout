@@ -76,6 +76,7 @@ namespace Klak.Spout
 		protected virtual void UpdateSharedTexture() {
 			Texture2D sharedTexture;
 			if (senderTexture != null
+				&& temporaryTexture != null
 				&& (sharedTexture = senderTexture.SharedTexture()) != null
 				&& sharedTexture.width > 0
 				&& sharedTexture.height > 0) {
