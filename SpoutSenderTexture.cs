@@ -19,16 +19,12 @@ namespace Klak.Spout {
         public virtual void Dispose() {
             ClearSender();
             ClearSharedTexture();
+			Invalidate();
 		}
         #endregion
         
-        public static bool InputValidity(Data data) {
-            return
-                !string.IsNullOrEmpty(data.name)
-                && data.width >= 4
-                && data.height >= 4;
-        }
-        public virtual void Invalidate() {
+		#region public
+		public virtual void Invalidate() {
             currValidity = false;
             curr = default(Data);
         }
