@@ -13,10 +13,6 @@ git submodule add https://github.com/nobnak/KlakSpout.git Assets/Packages/KlakSp
 ```
 
 ### Create (Spout) gather camera
- - Add a camera
-   - ClearFlags : Don't clear
-   - Culling musk : Nothing
-   - Depth : 100 (or any number larger than main cameras')
- - Attach SpoutSender script to this camera
-   - Set main cameras' targetTexture as "Event on update texture" event's target
-   - Set name and size to spout texture
+ - Attach SpoutSender script to a GameObject
+   - Set Camera.targetTexture as "Event on update texture" event's target
+   - Set name and size of Spout texture
