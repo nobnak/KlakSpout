@@ -2,6 +2,7 @@
 // https://github.com/keijiro/KlakSpout
 using nobnak.Gist.Resizable;
 using System.Collections;
+using System.Threading;
 using UnityEngine;
 
 namespace Klak.Spout
@@ -45,6 +46,8 @@ namespace Klak.Spout
             EnabledOnDisable.Invoke(!enabled);
         }
         void OnDisable() {
+			Thread.Sleep((int)(10 * (1000 * Time.smoothDeltaTime)));
+
 			SetTargetTexture(null);
 			if (senderTexture != null) {
                 senderTexture.Dispose();
@@ -90,7 +93,6 @@ namespace Klak.Spout
 				try {
 					Graphics.Blit(temporaryTexture.Texture, tempRT, _fixupMaterial, 0);
 					Graphics.CopyTexture(tempRT, sharedTexture);
-
 				} finally {
 					RenderTexture.ReleaseTemporary(tempRT);
 				}
