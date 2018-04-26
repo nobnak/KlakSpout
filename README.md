@@ -12,7 +12,7 @@ git submodule add https://github.com/nobnak/Gist.git Assets/Packages/Gist
 git submodule add https://github.com/nobnak/KlakSpout.git Assets/Packages/KlakSpout
 ```
 
-### Create (Spout) gather camera
+### Spout Sender
  - Attach SpoutSender script to a GameObject
    - Set Camera.targetTexture as "Event on update texture" event's target
    - Set name and size of Spout texture
