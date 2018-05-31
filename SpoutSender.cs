@@ -46,7 +46,7 @@ namespace Klak.Spout
             EnabledOnDisable.Invoke(!enabled);
         }
         void OnDisable() {
-			Thread.Sleep((int)(10 * (1000 * Time.smoothDeltaTime)));
+			Thread.Sleep((int)(1 * (1000 * Time.smoothDeltaTime)));
 
 			SetTargetTexture(null);
 			if (senderTexture != null) {
@@ -90,12 +90,10 @@ namespace Klak.Spout
 				
 				var tempRT = RenderTexture.GetTemporary(sharedTexture.width, sharedTexture.height,
 					0, UnityEngine.RenderTextureFormat.ARGB32, RenderTextureReadWrite.sRGB);
-				try {
-					Graphics.Blit(temporaryTexture.Texture, tempRT, _fixupMaterial, 0);
-					Graphics.CopyTexture(tempRT, sharedTexture);
-				} finally {
-					RenderTexture.ReleaseTemporary(tempRT);
-				}
+
+				Graphics.Blit(temporaryTexture.Texture, tempRT, _fixupMaterial, 0);
+				Graphics.CopyTexture(tempRT, sharedTexture);
+				RenderTexture.ReleaseTemporary(tempRT);
 			}
 		}
 		protected IEnumerator ProcessUpdateSharedTexture() {
