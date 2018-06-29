@@ -40,7 +40,7 @@ namespace Klak.Spout
 				antiAliasing = QualitySettings.antiAliasing
 			});
 
-			coroutineUpdateSharedTexture = StartCoroutine(ProcessUpdateSharedTexture());
+			//coroutineUpdateSharedTexture = StartCoroutine(ProcessUpdateSharedTexture());
 
             EnabledOnEnable.Invoke(enabled);
             EnabledOnDisable.Invoke(!enabled);
@@ -70,6 +70,9 @@ namespace Klak.Spout
             SetTargetTexture(temporaryTexture.Texture);
 
 			PluginEntry.Poll();
+		}
+		private void OnRenderImage(RenderTexture source, RenderTexture destination) {
+			UpdateSharedTexture();
 		}
 		#endregion
 
