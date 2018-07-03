@@ -76,6 +76,7 @@ namespace Klak.Spout
 		}
 		private void OnRenderImage(RenderTexture source, RenderTexture destination) {
 			UpdateSharedTexture();
+			Graphics.Blit(source, destination);
 		}
 		#endregion
 
