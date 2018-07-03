@@ -69,6 +69,9 @@ namespace Klak.Spout
 			temporaryTexture.Size = data.Size;
             SetTargetTexture(temporaryTexture.Texture);
 
+			if (!senderTexture.ExistSender())
+				Debug.LogWarning("Sender not found");
+
 			PluginEntry.Poll();
 		}
 		private void OnRenderImage(RenderTexture source, RenderTexture destination) {

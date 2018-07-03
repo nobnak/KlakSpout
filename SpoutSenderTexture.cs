@@ -29,7 +29,7 @@ namespace Klak.Spout {
             curr = default(Data);
         }
         public virtual void Prepare(Data next) {
-            if (!currValidity || !curr.Equals(next)) {
+            if (!Validity() || !curr.Equals(next)) {
                 ClearSender();
                 ClearSharedTexture();
                 Invalidate();
@@ -52,6 +52,9 @@ namespace Klak.Spout {
 						PluginEntry.GetTextureWidth(_sender),
 						PluginEntry.GetTextureHeight(_sender));
 			}
+		}
+		public virtual bool ExistSender() {
+			return _sender != System.IntPtr.Zero && PluginEntry.ExistSender(_sender);
 		}
 		#endregion
 
@@ -83,6 +86,9 @@ namespace Klak.Spout {
 		#endregion
 
 		#region private
+		protected virtual bool Validity() {
+			return currValidity && ExistSender();
+		}
 		protected virtual void ClearSharedTexture() {
             if (_sharedTexture != null) {
                 _sharedTexture.Destroy();

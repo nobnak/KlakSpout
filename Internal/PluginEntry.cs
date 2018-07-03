@@ -33,7 +33,10 @@ namespace Klak.Spout
         [DllImport("KlakSpout")]
         public static extern System.IntPtr CreateReceiver(string name);
 
-        [DllImport("KlakSpout")]
+		[DllImport("KlakSpout")]
+		public static extern bool ExistSender(System.IntPtr ptr);
+
+		[DllImport("KlakSpout")]
         public static extern void DestroySharedObject(System.IntPtr ptr);
 
         [DllImport("KlakSpout")]
