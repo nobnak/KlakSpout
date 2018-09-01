@@ -18,7 +18,9 @@ namespace Klak.Spout
         [SerializeField] BoolEvent EnabledOnDisable;
         [SerializeField] RenderTextureEvent EventOnUpdateTexture;
 
-		protected ResizableRenderTexture temporaryTexture;
+		[SerializeField] protected bool linear;
+
+		protected ResizableRenderTexture temptex0;
 		protected SpoutSenderTexture senderTexture;
         protected Material _fixupMaterial;
 		protected Coroutine coroutineUpdateSharedTexture;
@@ -35,9 +37,9 @@ namespace Klak.Spout
         {
             senderTexture = new SpoutSenderTexture();
 
-			temporaryTexture = new ResizableRenderTexture(new nobnak.Gist.Resizable.FormatRT() {
-				readWrite = RenderTextureReadWrite.sRGB,
-				antiAliasing = QualitySettings.antiAliasing
+			temptex0 = new ResizableRenderTexture(new nobnak.Gist.Resizable.FormatRT() {
+				readWrite = GetColorspace(),
+				antiAliasing = QualitySettings.antiAliasing,
 			});
 
 			//coroutineUpdateSharedTexture = StartCoroutine(ProcessUpdateSharedTexture());
@@ -53,9 +55,9 @@ namespace Klak.Spout
                 senderTexture.Dispose();
                 senderTexture = null;
             }
-			if (temporaryTexture != null) {
-				temporaryTexture.Dispose();
-				temporaryTexture = null;
+			if (temptex0 != null) {
+				temptex0.Dispose();
+				temptex0 = null;
 			}
 			if (coroutineUpdateSharedTexture != null) {
 				StopCoroutine(coroutineUpdateSharedTexture);
@@ -66,8 +68,8 @@ namespace Klak.Spout
         }
         void Update() {
 			senderTexture.Prepare(data);
-			temporaryTexture.Size = data.Size;
-            SetTargetTexture(temporaryTexture.Texture);
+			temptex0.Size = data.Size;
+            SetTargetTexture(temptex0.Texture);
 
 			if (!senderTexture.ExistSender())
 				Debug.LogWarning("Sender not found");
@@ -86,23 +88,36 @@ namespace Klak.Spout
 		protected virtual void UpdateSharedTexture() {
 			Texture2D sharedTexture;
 			if (senderTexture != null
-				&& temporaryTexture != null
+				&& temptex0 != null
 				&& (sharedTexture = senderTexture.SharedTexture()) != null
 				&& sharedTexture.width > 0
 				&& sharedTexture.height > 0) {
-				
+
 				if (_fixupMaterial == null)
 					_fixupMaterial = new Material(Shader.Find("Hidden/Spout/Fixup"));
 				_fixupMaterial.SetFloat("_ClearAlpha", _clearAlpha ? 1 : 0);
-				
-				var tempRT = RenderTexture.GetTemporary(sharedTexture.width, sharedTexture.height,
-					0, UnityEngine.RenderTextureFormat.ARGB32, RenderTextureReadWrite.sRGB);
 
-				Graphics.Blit(temporaryTexture.Texture, tempRT, _fixupMaterial, 0);
+				var tempRT = RenderTexture.GetTemporary(
+					sharedTexture.width, sharedTexture.height, 0,
+					UnityEngine.RenderTextureFormat.ARGB32,
+					GetColorspace());
+
+				var prevSrgbWrite = GL.sRGBWrite;
+				GL.sRGBWrite = true;
+				Graphics.Blit(temptex0.Texture, tempRT, _fixupMaterial, 0);
 				Graphics.CopyTexture(tempRT, sharedTexture);
+				//Graphics.Blit(temptex0.Texture, temptex1.Texture, _fixupMaterial);
+				//Graphics.CopyTexture(temptex1.Texture, sharedTexture);
+				//Graphics.CopyTexture(temporaryTexture.Texture, sharedTexture);
 				RenderTexture.ReleaseTemporary(tempRT);
+				GL.sRGBWrite = prevSrgbWrite;
 			}
 		}
+
+		protected RenderTextureReadWrite GetColorspace() {
+			return (linear ? RenderTextureReadWrite.Linear : RenderTextureReadWrite.sRGB);
+		}
+
 		protected IEnumerator ProcessUpdateSharedTexture() {
 			while (true) {
 				yield return new WaitForEndOfFrame();
