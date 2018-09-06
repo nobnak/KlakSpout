@@ -103,12 +103,9 @@ namespace Klak.Spout
 					GetColorspace());
 
 				var prevSrgbWrite = GL.sRGBWrite;
-				GL.sRGBWrite = true;
+				GL.sRGBWrite = !linear;
 				Graphics.Blit(temptex0.Texture, tempRT, _fixupMaterial, 0);
 				Graphics.CopyTexture(tempRT, sharedTexture);
-				//Graphics.Blit(temptex0.Texture, temptex1.Texture, _fixupMaterial);
-				//Graphics.CopyTexture(temptex1.Texture, sharedTexture);
-				//Graphics.CopyTexture(temporaryTexture.Texture, sharedTexture);
 				RenderTexture.ReleaseTemporary(tempRT);
 				GL.sRGBWrite = prevSrgbWrite;
 			}
