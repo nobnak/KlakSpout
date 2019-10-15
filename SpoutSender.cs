@@ -12,11 +12,11 @@ namespace Klak.Spout
     [ExecuteInEditMode]
     public class SpoutSender : MonoBehaviour {
         [SerializeField] protected bool _clearAlpha = true;
-        [SerializeField] protected SpoutSenderTexture.Data data;
+        [SerializeField] protected SpoutSenderTexture.Data data = new SpoutSenderTexture.Data();
 
-        [SerializeField] BoolEvent EnabledOnEnable;
-        [SerializeField] BoolEvent EnabledOnDisable;
-        [SerializeField] RenderTextureEvent EventOnUpdateTexture;
+        [SerializeField] BoolEvent EnabledOnEnable = new BoolEvent();
+        [SerializeField] BoolEvent EnabledOnDisable = new BoolEvent();
+        [SerializeField] RenderTextureEvent EventOnUpdateTexture = new RenderTextureEvent();
 
 		[SerializeField] protected bool linear;
 
