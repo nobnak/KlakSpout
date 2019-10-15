@@ -106,7 +106,7 @@ namespace Klak.Spout {
 		#region Classes
 		[System.Serializable]
         public struct Data {
-            public string name;
+			public string name;
             public int width;
             public int height;
 

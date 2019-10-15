@@ -9,10 +9,15 @@ namespace Klak.Spout
 {
     /// Spout sender class
     [AddComponentMenu("Klak/Spout/Spout Sender")]
-    [ExecuteInEditMode]
+    [ExecuteAlways]
     public class SpoutSender : MonoBehaviour {
         [SerializeField] protected bool _clearAlpha = true;
-        [SerializeField] protected SpoutSenderTexture.Data data = new SpoutSenderTexture.Data();
+		[SerializeField]
+		protected SpoutSenderTexture.Data data = new SpoutSenderTexture.Data() {
+			name = "UnitySender",
+			width = 1920,
+			height = 1080
+		};
 
         [SerializeField] BoolEvent EnabledOnEnable = new BoolEvent();
         [SerializeField] BoolEvent EnabledOnDisable = new BoolEvent();
@@ -20,6 +25,7 @@ namespace Klak.Spout
 
 		[SerializeField] protected bool linear;
 
+		protected Camera attachedCamera;
 		protected ResizableRenderTexture temptex0;
 		protected SpoutSenderTexture senderTexture;
         protected Material _fixupMaterial;
@@ -41,6 +47,8 @@ namespace Klak.Spout
 				readWrite = GetColorspace(),
 				antiAliasing = QualitySettings.antiAliasing,
 			});
+
+			attachedCamera = GetComponent<Camera>();
 
 			coroutineUpdateSharedTexture = StartCoroutine(ProcessUpdateSharedTexture());
 
@@ -76,16 +84,13 @@ namespace Klak.Spout
 
 			PluginEntry.Poll();
 		}
-#if false
-		private void OnRenderImage(RenderTexture source, RenderTexture destination) {
-			UpdateSharedTexture();
-			Graphics.Blit(source, destination);
-		}
-#endif
-#endregion
+		#endregion
 
+		#region member
 		protected virtual void SetTargetTexture(RenderTexture tex) {
-            EventOnUpdateTexture.Invoke(tex);
+			if (attachedCamera != null)
+				attachedCamera.targetTexture = tex;
+			EventOnUpdateTexture.Invoke(tex);
 		}
 		protected virtual void UpdateSharedTexture() {
 			Texture2D sharedTexture;
@@ -123,10 +128,13 @@ namespace Klak.Spout
 				UpdateSharedTexture();
 			}
 		}
+		#endregion
 
+		#region definitions
 		[System.Serializable]
         public class BoolEvent : UnityEngine.Events.UnityEvent<bool> { }
         [System.Serializable]
         public class RenderTextureEvent : UnityEngine.Events.UnityEvent<RenderTexture> { }
-    }
+		#endregion
+	}
 }
