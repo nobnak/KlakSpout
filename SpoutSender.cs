@@ -11,6 +11,8 @@ namespace Klak.Spout
     [AddComponentMenu("Klak/Spout/Spout Sender")]
     [ExecuteAlways]
     public class SpoutSender : MonoBehaviour {
+        public enum UpdateMode { Update = 0, RenderImage }
+
         [SerializeField] protected bool _clearAlpha = true;
 		[SerializeField]
 		protected SpoutSenderTexture.Data data = new SpoutSenderTexture.Data() {
@@ -24,8 +26,9 @@ namespace Klak.Spout
         [SerializeField] RenderTextureEvent EventOnUpdateTexture = new RenderTextureEvent();
 
 		[SerializeField] protected bool linear;
+        [SerializeField] protected UpdateMode updateMode;
 
-		protected Camera attachedCamera;
+        protected Camera attachedCamera;
 		protected ResizableRenderTexture temptex0;
 		protected SpoutSenderTexture senderTexture;
         protected Material _fixupMaterial;
@@ -84,10 +87,19 @@ namespace Klak.Spout
 
 			PluginEntry.Poll();
 		}
-		#endregion
+        private void OnRenderImage(RenderTexture source, RenderTexture destination) {
+            Graphics.Blit(source, destination);
 
-		#region member
-		protected virtual void SetTargetTexture(RenderTexture tex) {
+            switch (updateMode) {
+                case UpdateMode.RenderImage:
+                    UpdateSharedTexture();
+                    break;
+            }
+        }
+        #endregion
+
+        #region member
+        protected virtual void SetTargetTexture(RenderTexture tex) {
 			if (attachedCamera != null)
 				attachedCamera.targetTexture = tex;
 			EventOnUpdateTexture.Invoke(tex);
@@ -125,7 +137,8 @@ namespace Klak.Spout
 		protected IEnumerator ProcessUpdateSharedTexture() {
 			while (true) {
 				yield return new WaitForEndOfFrame();
-				UpdateSharedTexture();
+                if (updateMode == UpdateMode.Update)
+				    UpdateSharedTexture();
 			}
 		}
 		#endregion
