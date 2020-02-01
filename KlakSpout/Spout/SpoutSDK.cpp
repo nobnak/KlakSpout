@@ -1481,7 +1481,7 @@ bool Spout::CheckSpoutPanel()
 							g_Height = (unsigned int)TextureInfo.height;
 							g_Format = TextureInfo.format;
 							// 31.10.17
-							g_ShareHandle = (HANDLE)UIntToPtr(TextureInfo.shareHandle);
+							g_ShareHandle = (HANDLE)TextureInfo.shareHandle;
 							// 24.11.15 - not needed if the sender exists - and it is already checked as active
 							// Register in the list of senders and make it the active sender
 							// interop.senders.RegisterSenderName(newname);
@@ -1498,7 +1498,7 @@ bool Spout::CheckSpoutPanel()
 								g_Height = (unsigned int)TextureInfo.height;
 								g_Format = TextureInfo.format;
 								// 31.10.17
-								g_ShareHandle = (HANDLE)UIntToPtr(TextureInfo.shareHandle);
+								g_ShareHandle = (HANDLE)TextureInfo.shareHandle;
 								bRet = true; // will pass on next call to receivetexture
 							}
 						} // no active sender
