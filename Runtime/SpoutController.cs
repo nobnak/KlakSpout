@@ -23,6 +23,13 @@ namespace Klak.Spout {
 		[SerializeField]
 		protected RenderTextureFormat format = RenderTextureFormat.ARGBHalf;
 
+		[SerializeField]
+		protected RenderTextureEvent Changed = new RenderTextureEvent();
+		[SerializeField]
+		protected BoolEvent ActiveOnEnabled = new BoolEvent();
+		[SerializeField]
+		protected BoolEvent ActiveOnDisabled = new BoolEvent();
+
 		protected SpoutSender sender = null;
 		protected Camera targetCamera = null;
 
@@ -41,35 +48,42 @@ namespace Klak.Spout {
 			validator.Reset();
 			validator.Validation += () => {
 				Debug.LogFormat("Update Spout : {0}", data);
-				var active = sender != null && (!data.spout || (data.width > 4 && data.height > 4));
-				if (active) {
-					guidata = new GUIData(data);
+				SetTargetTexture(null);
+				guidata = new GUIData(data);
 
-					var frt = new FormatRT() {
-						textureFormat = format,
-						depth = 24,
-						useMipMap = false,
-						antiAliasing = QualitySettings.antiAliasing,
-						readWrite = RenderTextureReadWrite.Default,
-						filterMode = FilterMode.Bilinear,
-						wrapMode = TextureWrapMode.Clamp,
-						anisoLevel = 0
-					};
+				var frt = new FormatRT() {
+					textureFormat = format,
+					depth = 24,
+					useMipMap = false,
+					antiAliasing = QualitySettings.antiAliasing,
+					readWrite = RenderTextureReadWrite.Default,
+					filterMode = FilterMode.Bilinear,
+					wrapMode = TextureWrapMode.Clamp,
+					anisoLevel = 0
+				};
 
-					targetCamera.targetTexture = null;
+				if (sender != null)
 					sender.enabled = data.spout;
+
+				if (data.spout) {
 					targetTex.Format = frt;
 					targetTex.Size = data.Size;
-					if (data.spout)
-						targetCamera.targetTexture = targetTex;
+					SetTargetTexture(targetTex);
+				} else {
+					targetTex.Release();
 				}
+
+				ActiveOnEnabled.Invoke(data.spout);
+				ActiveOnDisabled.Invoke(!data.spout);
 			};
 			Load();
+
+			validator.Validate();
 		}
+
+
 		private void OnDisable() {
-			if (targetCamera != null) {
-				targetCamera.targetTexture = null;
-			}
+			SetTargetTexture(null);
 			if (targetTex != null) {
 				targetTex.Dispose();
 				targetTex = null;
@@ -88,7 +102,9 @@ namespace Klak.Spout {
 			}
 		}
 		#endregion
+
 		#region member
+		#region gui
 		private void Window(int id) {
 			using (new GUILayout.HorizontalScope()) {
 				if (GUILayout.Button("Save"))
@@ -113,6 +129,13 @@ namespace Klak.Spout {
 				}
 			}
 			UnityEngine.GUI.DragWindow();
+		}
+		#endregion
+
+		private void SetTargetTexture(RenderTexture targetTex) {
+			if (targetCamera != null)
+				targetCamera.targetTexture = targetTex;
+			Changed.Invoke(targetTex);
 		}
 		private void Load() {
 			serialized.TryLoadOverwrite(ref data);
@@ -175,6 +198,10 @@ namespace Klak.Spout {
 				data.height = height;
 			}
 		}
+		[System.Serializable]
+		public class RenderTextureEvent : UnityEngine.Events.UnityEvent<RenderTexture> { }
+		[System.Serializable]
+		public class BoolEvent : UnityEngine.Events.UnityEvent<bool> { }
 		#endregion
 	}
 }
