@@ -22,13 +22,8 @@ namespace Klak.Spout {
 		protected KeycodeToggle toggle = new KeycodeToggle(KeyCode.S);
 		[SerializeField]
 		protected RenderTextureFormat format = RenderTextureFormat.ARGBHalf;
-
 		[SerializeField]
-		protected RenderTextureEvent Changed = new RenderTextureEvent();
-		[SerializeField]
-		protected BoolEvent ActiveOnEnabled = new BoolEvent();
-		[SerializeField]
-		protected BoolEvent ActiveOnDisabled = new BoolEvent();
+		protected Events events = new Events();
 
 		protected SpoutSender sender = null;
 		protected Camera targetCamera = null;
@@ -73,8 +68,8 @@ namespace Klak.Spout {
 					targetTex.Release();
 				}
 
-				ActiveOnEnabled.Invoke(data.spout);
-				ActiveOnDisabled.Invoke(!data.spout);
+				events.ActiveOnEnabled.Invoke(data.spout);
+				events.ActiveOnDisabled.Invoke(!data.spout);
 			};
 			Load();
 
@@ -135,7 +130,7 @@ namespace Klak.Spout {
 		private void SetTargetTexture(RenderTexture targetTex) {
 			if (targetCamera != null)
 				targetCamera.targetTexture = targetTex;
-			Changed.Invoke(targetTex);
+			events.Changed.Invoke(targetTex);
 		}
 		private void Load() {
 			serialized.TryLoadOverwrite(ref data);
@@ -202,6 +197,12 @@ namespace Klak.Spout {
 		public class RenderTextureEvent : UnityEngine.Events.UnityEvent<RenderTexture> { }
 		[System.Serializable]
 		public class BoolEvent : UnityEngine.Events.UnityEvent<bool> { }
+		[System.Serializable]
+		public class Events {
+			public RenderTextureEvent Changed = new RenderTextureEvent();
+			public BoolEvent ActiveOnEnabled = new BoolEvent();
+			public BoolEvent ActiveOnDisabled = new BoolEvent();
+		}
 		#endregion
 	}
 }
