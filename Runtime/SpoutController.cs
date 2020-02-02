@@ -4,37 +4,76 @@ using nobnak.Gist.IMGUI.Scope;
 using nobnak.Gist.InputDevice;
 using nobnak.Gist.Loader;
 using nobnak.Gist.ObjectExt;
+using nobnak.Gist.Resizable;
 using UnityEngine;
 
 namespace Klak.Spout {
 
 	[ExecuteAlways]
+	[RequireComponent(typeof(Camera))]
+	[RequireComponent(typeof(SpoutSender))]
 	public class SpoutController : MonoBehaviour {
-		[SerializeField]
-		protected SpoutSender sender = null;
 		[SerializeField]
 		protected Data data = new Data();
 		[SerializeField]
-		protected FilePath serialized = new FilePath();
+		protected FilePath serialized = new FilePath(
+			string.Format(FilePath.DEFAULT_FILEPATH_PATTERN, "Spout.txt"));
 		[SerializeField]
 		protected KeycodeToggle toggle = new KeycodeToggle(KeyCode.S);
+		[SerializeField]
+		protected RenderTextureFormat format = RenderTextureFormat.ARGBHalf;
+
+		protected SpoutSender sender = null;
+		protected Camera targetCamera = null;
 
 		protected Validator validator = new Validator();
 		protected GUIData guidata;
 		protected Rect windowRect = new Rect(10, 10, 300, 100);
+		protected ResizableRenderTexture targetTex;
 
 		#region unity
 		private void OnEnable() {
+			sender = GetComponent<SpoutSender>();
+			targetCamera = GetComponent<Camera>();
+
+			targetTex = new ResizableRenderTexture();
+
 			validator.Reset();
 			validator.Validation += () => {
 				Debug.LogFormat("Update Spout : {0}", data);
 				var active = sender != null && (!data.spout || (data.width > 4 && data.height > 4));
 				if (active) {
 					guidata = new GUIData(data);
-					data.Apply(sender);
+
+					var frt = new FormatRT() {
+						textureFormat = format,
+						depth = 24,
+						useMipMap = false,
+						antiAliasing = QualitySettings.antiAliasing,
+						readWrite = RenderTextureReadWrite.Default,
+						filterMode = FilterMode.Bilinear,
+						wrapMode = TextureWrapMode.Clamp,
+						anisoLevel = 0
+					};
+
+					targetCamera.targetTexture = null;
+					sender.enabled = data.spout;
+					targetTex.Format = frt;
+					targetTex.Size = data.Size;
+					if (data.spout)
+						targetCamera.targetTexture = targetTex;
 				}
 			};
 			Load();
+		}
+		private void OnDisable() {
+			if (targetCamera != null) {
+				targetCamera.targetTexture = null;
+			}
+			if (targetTex != null) {
+				targetTex.Dispose();
+				targetTex = null;
+			}
 		}
 		private void OnValidate() {
 			validator.Invalidate();
@@ -42,8 +81,6 @@ namespace Klak.Spout {
 		private void Update() {
 			toggle.Update();
 			validator.Validate();
-		}
-		private void OnDisable() {
 		}
 		private void OnGUI() {
 			if (toggle.Visible) {
@@ -115,12 +152,10 @@ namespace Klak.Spout {
 			}
 			#endregion
 
-			public void Apply(SpoutSender sender) {
-				sender.enabled = spout;
-				var dst = sender.Data;
-				dst.width = width;
-				dst.height = height;
-				sender.Data = dst;
+			public Vector2Int Size {
+				get {
+					return new Vector2Int(width, height);
+				}
 			}
 			#endregion
 		}
